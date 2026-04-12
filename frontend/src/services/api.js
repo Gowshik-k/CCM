@@ -9,7 +9,6 @@ const api = axios.create({
     },
 });
 
-// Helper to set the bearer token for subsequent requests
 export const setAuthToken = (token) => {
     if (token) {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -28,9 +27,16 @@ export const complaintService = {
 };
 
 export const adminService = {
+    // Complaints
     getComplaints: (params) => api.get('/admin/complaints', { params }),
     updateStatus: (id, status) => api.put(`/admin/update-status/${id}`, { status }),
     overrideComplaint: (id, data) => api.put(`/admin/override/${id}`, data),
+    
+    // Users
+    getUsers: () => api.get('/admin/users'),
+    createUser: (data) => api.post('/admin/users', data),
+    updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
+    deleteUser: (id) => api.delete(`/admin/users/${id}`),
 };
 
 export const departmentService = {

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
+const compression = require('compression');
 const connectDB = require('./config/db.js');
 
 // Load environment variables
@@ -12,8 +13,9 @@ connectDB();
 
 const app = express();
 
-// Middlewares
+// Security & Optimization Middlewares
 app.use(helmet()); 
+app.use(compression()); // Compress all responses
 app.use(cors());
 app.use(express.json());
 
@@ -29,9 +31,19 @@ app.use('/api/complaint', complaintRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/department', departmentRoutes);
 
-// Basic Route
+// Health Check & Base Route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
 app.get('/', (req, res) => {
   res.send('VocalCampus AI API is running...');
+});
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong on the server!' });
 });
 
 // For local development

@@ -43,7 +43,7 @@ const SubmitComplaint = () => {
                 <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-left mb-8">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Your Tracking ID</p>
                     <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
-                        <code className="text-xl font-mono font-bold text-blue-600">{submittedId}</code>
+                        <code className="text-xl font-mono font-bold text-blue-600 uppercase">{submittedId}</code>
                         <button 
                             onClick={() => {
                                 navigator.clipboard.writeText(submittedId);

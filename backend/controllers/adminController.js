@@ -1,8 +1,7 @@
 const Complaint = require('../models/Complaint');
+const User = require('../models/User');
 
 // @desc    Get all complaints (with filtering)
-// @route   GET /api/admin/complaints
-// @access  Admin (would be protected in real app)
 const getComplaints = async (req, res) => {
     try {
         const { priority, department, status } = req.query;
@@ -26,8 +25,6 @@ const getComplaints = async (req, res) => {
 };
 
 // @desc    Update complaint status
-// @route   PUT /api/admin/update-status/:id
-// @access  Admin
 const updateStatus = async (req, res) => {
     try {
         const { status } = req.body;
@@ -58,8 +55,6 @@ const updateStatus = async (req, res) => {
 };
 
 // @desc    Override AI Priority or Category
-// @route   PUT /api/admin/override/:id
-// @access  Admin
 const overrideComplaint = async (req, res) => {
     try {
         const { priority, category, department } = req.body;
@@ -90,8 +85,108 @@ const overrideComplaint = async (req, res) => {
     }
 };
 
+// @desc    Get all users (Staff/Managers)
+const getUsers = async (req, res) => {
+    try {
+        const users = await User.find({}).select('-password');
+        res.status(200).json({
+            success: true,
+            data: users,
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Server Error' });
+    }
+};
+
+// @desc    Create new staff user
+const createUser = async (req, res) => {
+    try {
+        const { name, email, password, role, department } = req.body;
+
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ error: 'User already exists' });
+        }
+
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role,
+            department
+        });
+
+        res.status(201).json({
+            success: true,
+            data: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                department: user.department
+            }
+        });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ error: 'Server Error' });
+    }
+};
+
+// @desc    Update a user (Role/Department)
+// @route   PUT /api/admin/users/:id
+const updateUser = async (req, res) => {
+    try {
+        const { name, role, department } = req.body;
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        user.name = name || user.name;
+        user.role = role || user.role;
+        user.department = department || user.department;
+
+        const updatedUser = await user.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                department: updatedUser.department
+            }
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Server Error' });
+    }
+};
+
+// @desc    Delete a user
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        await user.deleteOne();
+        res.status(200).json({ success: true, message: 'User removed' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server Error' });
+    }
+};
+
 module.exports = {
     getComplaints,
     updateStatus,
     overrideComplaint,
+    getUsers,
+    createUser,
+    updateUser,
+    deleteUser
 };

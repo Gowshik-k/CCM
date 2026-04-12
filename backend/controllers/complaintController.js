@@ -51,7 +51,7 @@ const submitComplaint = async (req, res) => {
 // @access  Public
 const trackComplaint = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id.toLowerCase();
 
         const complaint = await Complaint.findOne({ complaintId: id });
 
