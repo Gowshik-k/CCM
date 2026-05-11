@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { complaintService } from '../services/api';
 import { toast } from 'react-toastify';
 
@@ -7,6 +7,14 @@ const SubmitComplaint = () => {
     const [loading, setLoading] = useState(false);
     const [submittedId, setSubmittedId] = useState(null);
     const [aiResult, setAiResult] = useState(null);
+
+    // Prevent body scroll
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,136 +39,134 @@ const SubmitComplaint = () => {
 
     if (submittedId) {
         return (
-            <div className="max-w-xl mx-auto mt-10 text-center animate-in fade-in zoom-in duration-500">
-                <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h1 className="text-3xl font-bold text-slate-900 mb-2">Thank You!</h1>
-                <p className="text-slate-500 mb-8">Your complaint has been safely recorded anonymously.</p>
-                
-                <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-left mb-8">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Your Tracking ID</p>
-                    <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
-                        <code className="text-xl font-mono font-bold text-blue-600 uppercase">{submittedId}</code>
-                        <button 
-                            onClick={() => {
-                                navigator.clipboard.writeText(submittedId);
-                                toast.info('ID Copied!');
-                            }}
-                            className="text-blue-600 hover:text-blue-700 font-medium text-sm px-3 py-1 bg-blue-50 rounded-lg transition-colors"
-                        >
-                            Copy ID
-                        </button>
-                    </div>
-                    
-                    {aiResult && (
-                        <div className="mt-6 pt-6 border-t border-slate-100">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">AI Analysis Result</p>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-3 bg-slate-50 rounded-lg">
-                                    <p className="text-[10px] text-slate-500 uppercase">Priority</p>
-                                    <p className={`font-bold ${aiResult.priority === 'High' ? 'text-red-600' : 'text-slate-700'}`}>{aiResult.priority}</p>
-                                </div>
-                                <div className="p-3 bg-slate-50 rounded-lg">
-                                    <p className="text-[10px] text-slate-500 uppercase">Department</p>
-                                    <p className="font-bold text-slate-700">{aiResult.department}</p>
-                                </div>
+            <div className="fixed inset-0 z-[60] bg-white flex items-center justify-center p-6 animate-in fade-in duration-700">
+                <div className="max-w-md w-full">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center mb-8">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h1 className="text-3xl font-black text-slate-950 mb-3 tracking-tighter italic uppercase">Confirmed.</h1>
+                        <p className="text-slate-600 font-bold uppercase text-[9px] tracking-[0.3em] mb-8">Submission ID: {submittedId}</p>
+                        
+                        <div className="w-full grid grid-cols-2 gap-3 mb-8">
+                            <div className="p-6 bg-slate-50 rounded-[1.5rem] border border-slate-200">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">Routed To</p>
+                                <p className="text-sm font-bold text-slate-950 truncate">{aiResult?.department || 'General'}</p>
+                            </div>
+                            <div className="p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">Security Level</p>
+                                <p className="text-sm font-bold text-slate-950">Encrypted</p>
                             </div>
                         </div>
-                    )}
-                </div>
 
-                <button 
-                    onClick={() => { setSubmittedId(null); setAiResult(null); }}
-                    className="btn-primary w-full"
-                >
-                    Submit Another Complaint
-                </button>
+                        <button 
+                            onClick={() => { setSubmittedId(null); setAiResult(null); }}
+                            className="bg-slate-900 text-white px-10 py-3.5 rounded-full font-black text-sm hover:bg-black transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10"
+                        >
+                            Log Another Issue
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-2xl mx-auto animate-in slide-in-from-bottom-10 duration-700">
-            <header className="mb-10 lg:text-center text-left">
-                <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-                    Lodge a <span className="text-blue-600">Complaint</span>
-                </h1>
-                <p className="text-lg text-slate-500">
-                    Your voice matters. Submit your concerns anonymously and our AI will route it to the right department instantly.
-                </p>
-            </header>
-
-            <div className="glass-card overflow-hidden">
-                <div className="h-2 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
-                <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Subject / Title</label>
-                        <input 
-                            type="text"
-                            placeholder="Brief summary of the issue..."
-                            className="input-field"
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        />
+        <div className="fixed inset-0 top-16 bg-white flex flex-col lg:flex-row overflow-hidden animate-in fade-in duration-1000">
+            {/* Branding Section (Width: 35% | Increased Content Size) */}
+            <div className="w-full lg:w-[35%] h-1/4 lg:h-full bg-slate-50 flex flex-col justify-center px-10 md:px-20 py-12 relative border-r border-slate-200">
+                <div className="relative z-10 max-w-sm">
+                    <div className="inline-flex items-center space-x-3 mb-10">
+                        <div className="h-0.5 w-8 bg-slate-950"></div>
+                        <span className="text-[10px] font-black text-slate-950 uppercase tracking-[0.4em]">VocalCampus AI</span>
                     </div>
+                    
+                    <h1 className="text-5xl md:text-6xl font-black text-slate-950 leading-[0.9] tracking-tighter mb-10">
+                        Your Voice, <br />
+                        <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-slate-950 to-slate-500">Shielded.</span>
+                    </h1>
+                    
+                    <p className="text-slate-800 text-lg font-semibold leading-relaxed mb-12">
+                        Enterprise-grade anonymity for campus grievances. Our neural engine handles the routing securely.
+                    </p>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Detailed Description</label>
-                        <textarea 
-                            rows="6"
-                            placeholder="Please provide details. Don't worry, your identity is never stored."
-                            className="input-field resize-none"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        ></textarea>
-                        <p className="mt-3 text-xs text-slate-400 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            AI will use this to automatically categorize and prioritize your request.
-                        </p>
+                    <div className="flex flex-wrap gap-2.5">
+                        <div className="px-6 py-3 bg-white rounded-full border border-slate-300 text-[10px] font-black text-slate-700 uppercase tracking-widest shadow-sm">
+                            SHA-256 ENCRYPTED
+                        </div>
                     </div>
+                </div>
 
-                    <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="btn-primary w-full flex items-center justify-center space-x-2 py-4 shadow-xl shadow-blue-500/30"
-                    >
-                        {loading ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Analyzing & Routing...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
-                                <span>Submit Securely</span>
-                            </>
-                        )}
-                    </button>
-                </form>
+                <div className="absolute top-1/2 left-0 w-80 h-80 bg-blue-100 rounded-full blur-[100px] -translate-y-1/2 -translate-x-1/2 opacity-30"></div>
             </div>
-            
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-4 p-4 grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100">
-                    <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100 italic font-serif text-blue-600 font-bold">Encrypted</div>
-                    <p className="text-[10px] text-slate-500 uppercase leading-tight font-bold">End-to-End<br/>Secure</p>
+
+            {/* Form Section (Width: flex-grow) */}
+            <div className="flex-grow h-full bg-white flex flex-col justify-center px-10 md:px-32 py-12 relative overflow-hidden">
+                <div className="max-w-2xl w-full mx-auto lg:mx-0">
+                    <header className="mb-12">
+                        <h2 className="text-2xl font-black text-slate-950 tracking-tight mb-2 flex items-center">
+                            Lodge Grievance
+                            <span className="ml-3 w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                        </h2>
+                        <p className="text-slate-600 font-bold uppercase text-[8px] tracking-[0.3em]">Institutional Secure Portal v4.0</p>
+                    </header>
+
+                    <form onSubmit={handleSubmit} className="space-y-10">
+                        <div className="group space-y-2.5">
+                            <label className="text-[8px] font-black text-slate-500 group-focus-within:text-slate-950 uppercase tracking-widest transition-colors block">
+                                Subject / Context
+                            </label>
+                            <input 
+                                type="text"
+                                placeholder="What is the issue about?"
+                                className="w-full text-xl font-bold bg-transparent border-b-2 border-slate-200 focus:border-slate-950 transition-all outline-none pb-3 placeholder:text-slate-300 text-slate-950"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="group space-y-2.5">
+                            <label className="text-[8px] font-black text-slate-500 group-focus-within:text-slate-950 uppercase tracking-widest transition-colors block">
+                                Detailed Description
+                            </label>
+                            <textarea 
+                                rows="6"
+                                placeholder="Describe the concern clearly. Avoid personal identifiers to maintain 100% anonymity."
+                                className="w-full bg-slate-50 rounded-2xl p-8 focus:bg-white border-2 border-slate-200 focus:border-slate-900 transition-all outline-none text-slate-900 font-semibold placeholder:text-slate-400 resize-none leading-relaxed text-base"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            ></textarea>
+                        </div>
+
+                        <div className="pt-4">
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className="group bg-slate-900 text-white w-full py-5 rounded-full text-lg font-black hover:bg-black transition-all flex items-center justify-center space-x-3 shadow-xl shadow-slate-900/10 active:scale-[0.98]"
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        <span>Analyzing...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Submit Grievance Securely</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                        </svg>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div className="flex items-center space-x-4 p-4 grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100">
-                    <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100 italic font-serif text-blue-600 font-bold">AI Scan</div>
-                    <p className="text-[10px] text-slate-500 uppercase leading-tight font-bold">Auto<br/>Categorized</p>
-                </div>
-                <div className="flex items-center space-x-4 p-4 grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100">
-                    <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100 italic font-serif text-blue-600 font-bold">100% Anon</div>
-                    <p className="text-[10px] text-slate-500 uppercase leading-tight font-bold">Developer<br/>Privacy</p>
+                
+                {/* Decorative Elements */}
+                <div className="absolute bottom-8 right-8 flex space-x-1">
+                    {[1,2,3].map(i => <div key={i} className="w-0.5 h-0.5 rounded-full bg-slate-200"></div>)}
                 </div>
             </div>
         </div>

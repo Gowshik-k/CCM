@@ -181,6 +181,52 @@ const deleteUser = async (req, res) => {
     }
 };
 
+// @desc    Get dashboard stats
+const getStats = async (req, res) => {
+    try {
+        const total = await Complaint.countDocuments();
+        const pending = await Complaint.countDocuments({ status: 'Pending' });
+        const inProgress = await Complaint.countDocuments({ status: 'In Progress' });
+        const resolved = await Complaint.countDocuments({ status: 'Resolved' });
+
+        const byCategory = await Complaint.aggregate([
+            { $group: { _id: '$category', count: { $sum: 1 } } }
+        ]);
+
+        const byPriority = await Complaint.aggregate([
+            { $group: { _id: '$priority', count: { $sum: 1 } } }
+        ]);
+
+        // Last 7 days activity
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const activity = await Complaint.aggregate([
+            { $match: { createdAt: { $gte: sevenDaysAgo } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                counts: { total, pending, inProgress, resolved },
+                byCategory,
+                byPriority,
+                activity
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.status(500).json({ error: 'Server Error' });
+    }
+};
+
 module.exports = {
     getComplaints,
     updateStatus,
@@ -188,5 +234,7 @@ module.exports = {
     getUsers,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getStats
 };
+

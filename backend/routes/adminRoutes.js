@@ -7,13 +7,17 @@ const {
     getUsers,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getStats
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middlewares/authMiddleware');
 
 // Protect all admin routes
 router.use(protect);
 router.use(admin);
+
+// Dashboard Stats
+router.get('/stats', getStats);
 
 // Complaints Management
 router.get('/complaints', getComplaints);

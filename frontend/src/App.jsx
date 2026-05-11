@@ -11,6 +11,7 @@ import TrackComplaint from './pages/TrackComplaint';
 import StaffDashboard from './pages/StaffDashboard';
 import UserManagement from './pages/UserManagement';
 import Login from './pages/Login';
+import TaskManagement from './pages/TaskManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Classic Light Navbar
@@ -89,6 +90,11 @@ const Sidebar = ({ isOpen, onClose }) => {
               <span>User Registry</span>
             </NavLink>
           )}
+
+          <NavLink to="/dashboard/tasks" onClick={onClose} className={({ isActive }) => `flex items-center space-x-3 px-3 py-2.5 rounded transition-all text-sm font-semibold ${isActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+            <span>Task Management</span>
+          </NavLink>
         </nav>
 
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
@@ -134,7 +140,7 @@ const AppContent = () => {
       )}
       
       <main className={`flex-grow overflow-x-hidden ${isDashboard ? 'w-full md:overflow-y-auto h-screen' : ''}`}>
-        <div className={`max-w-7xl mx-auto px-4 md:px-10 ${isDashboard ? 'py-8' : 'py-12 md:py-20'}`}>
+        <div className={`max-w-7xl mx-auto px-4 md:px-10 ${isDashboard ? 'py-8' : 'py-2 md:py-4'}`}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/submit" element={<SubmitComplaint />} />
@@ -150,6 +156,12 @@ const AppContent = () => {
             <Route path="/dashboard/users" element={
               <ProtectedRoute adminOnly>
                 <UserManagement />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard/tasks" element={
+              <ProtectedRoute>
+                <TaskManagement />
               </ProtectedRoute>
             } />
             

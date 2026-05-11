@@ -29,6 +29,7 @@ export const complaintService = {
 export const adminService = {
     // Complaints
     getComplaints: (params) => api.get('/admin/complaints', { params }),
+    getStats: () => api.get('/admin/stats'),
     updateStatus: (id, status) => api.put(`/admin/update-status/${id}`, { status }),
     overrideComplaint: (id, data) => api.put(`/admin/override/${id}`, data),
     
