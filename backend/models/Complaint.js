@@ -31,17 +31,22 @@ const complaintSchema = new mongoose.Schema(
             type: String,
             enum: ['Low', 'Medium', 'High'],
             default: 'Medium',
+            index: true,
         },
+
         department: {
             type: String,
-            // Default placeholder until AI router categorizes or Admin sets
             default: 'General Administration',
+            index: true,
         },
+
         status: {
             type: String,
             enum: ['Pending', 'In Progress', 'Resolved'],
             default: 'Pending',
+            index: true,
         },
+
         resolutionNote: {
             type: String,
             default: '',

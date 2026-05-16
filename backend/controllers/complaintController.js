@@ -1,5 +1,8 @@
 const Complaint = require('../models/Complaint');
+const User = require('../models/User');
 const { analyzeComplaint } = require('../utils/aiProcessor');
+const { sendNewComplaintNotification } = require('../utils/emailService');
+
 
 // @desc    Submit a new complaint
 // @route   POST /api/complaint
@@ -29,6 +32,36 @@ const submitComplaint = async (req, res) => {
 
         const complaint = await Complaint.create(newComplaintData);
 
+        // Notify Department Staff and Admins via Email (Async)
+        try {
+            // Find both department-specific staff AND all admins
+            const relevantUsers = await User.find({ 
+                $or: [
+                    { department: complaint.department },
+                    { role: 'admin' }
+                ]
+            });
+            
+            const recipientEmails = relevantUsers.map(user => user.email).filter(Boolean);
+            
+            if (recipientEmails.length > 0) {
+                // Join emails into a comma-separated string for Nodemailer
+                const to = recipientEmails.join(', ');
+                
+                sendNewComplaintNotification(to, {
+                    complaintId: complaint.complaintId,
+                    title: complaint.title,
+                    priority: complaint.priority,
+                    department: complaint.department,
+                    description: complaint.description
+                }).catch(err => console.error('Delayed email sending failed:', err));
+            } else {
+                console.warn(`No recipients found for complaint ${complaint.complaintId} (Dept: ${complaint.department})`);
+            }
+        } catch (emailError) {
+            console.error('Failed to initiate email notification:', emailError);
+        }
+
         res.status(201).json({
             success: true,
             data: {
@@ -39,7 +72,6 @@ const submitComplaint = async (req, res) => {
                 category: complaint.category,
             }
         });
-
     } catch (error) {
         console.error('Error submitting complaint:', error);
         res.status(500).json({ error: 'Server Error' });

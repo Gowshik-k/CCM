@@ -52,8 +52,9 @@ const analyzeComplaint = (text) => {
     for (const [category, keywords] of Object.entries(CATEGORY_MAP)) {
         let matches = 0;
         keywords.forEach((kw) => {
-            // Basic match (could be improved with regex word boundaries)
-            if (lowerText.includes(kw)) matches++;
+            // Whole-word matching using Regex for higher accuracy
+            const regex = new RegExp(`\\b${kw}\\b`, 'i');
+            if (regex.test(lowerText)) matches++;
         });
 
         if (matches > maxMatches) {
@@ -61,6 +62,7 @@ const analyzeComplaint = (text) => {
             matchedCategory = category;
         }
     }
+
 
     // If harassment category is matched, force priority to High
     if (matchedCategory === 'harassment') {

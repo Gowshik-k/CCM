@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const helmet = require('helmet');
 const compression = require('compression');
 const connectDB = require('./config/db.js');
+const rateLimit = require('express-rate-limit');
+
 
 // Load environment variables
 dotenv.config();
@@ -17,6 +19,23 @@ const app = express();
 app.use(helmet()); 
 app.use(compression()); 
 app.use(express.json());
+
+// Global Rate Limiter
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per window
+    message: { error: 'Too many requests from this IP, please try again later.' }
+});
+app.use('/api/', globalLimiter);
+
+// Strict Rate Limiter for Complaint Submissions (Prevent Spam)
+const complaintLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // Limit each IP to 10 complaints per hour
+    message: { error: 'Submission limit reached. Please wait an hour before lodging another grievance.' }
+});
+app.use('/api/complaint', complaintLimiter);
+
 
 // CORS Configuration
 const corsOptions = {

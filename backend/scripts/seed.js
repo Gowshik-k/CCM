@@ -13,20 +13,30 @@ const seedAdmin = async () => {
     // Clear existing users? Maybe better not if it's a real db, but for seed usually yes.
     // await User.deleteMany(); 
 
-    const adminExists = await User.findOne({ email: 'admin@vocalcampus.com' });
+    const departments = [
+      { name: 'Super Admin', email: 'admin@vocalcampus.com', role: 'admin', dept: 'General Administration' },
+      { name: 'Academic Manager', email: 'academics@vocalcampus.edu', role: 'department', dept: 'Academic Affairs' },
+      { name: 'Facilities Manager', email: 'facilities@vocalcampus.edu', role: 'department', dept: 'Maintenance & Facilities' },
+      { name: 'Hostel Manager', email: 'gowsikk8@gmail.com', role: 'department', dept: 'Hostel Administration' },
+      { name: 'Disciplinary Head', email: 'disciplinary@vocalcampus.edu', role: 'department', dept: 'Disciplinary Committee' }
+    ];
 
-    if (!adminExists) {
-      await User.create({
-        name: 'Super Admin',
-        email: 'admin@vocalcampus.com',
-        password: 'adminpassword123',
-        role: 'admin',
-        department: 'General Administration'
-      });
-      console.log('Admin user created successfully!');
-    } else {
-      console.log('Admin user already exists.');
+    for (const d of departments) {
+      const exists = await User.findOne({ email: d.email });
+      if (!exists) {
+        await User.create({
+          name: d.name,
+          email: d.email,
+          password: 'password123',
+          role: d.role,
+          department: d.dept
+        });
+        console.log(`✅ User created: ${d.name} (${d.dept})`);
+      } else {
+        console.log(`ℹ️  User already exists: ${d.name}`);
+      }
     }
+
 
     process.exit();
   } catch (error) {
